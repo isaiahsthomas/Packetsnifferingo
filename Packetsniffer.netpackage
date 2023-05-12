@@ -1,0 +1,40 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"net"
+)
+
+func main() {
+	// Define the network interface to sniff on
+	iface := "eth0"
+
+	// Resolve the network interface
+	netInterface, err := net.InterfaceByName(iface)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Open a raw network socket and define port traffic
+	conn, err := net.ListenPacket("ip4:tcp", netInterface.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	// Buffer for storing packet data
+	buffer := make([]byte, 65536)
+
+	// Start capturing packets
+	for {
+		// Read packet data into the buffer
+		n, _, err := conn.ReadFrom(buffer)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Process the packet
+		fmt.Println(buffer[:n])
+	}
+}
